@@ -48,6 +48,9 @@ export default function UploadPage() {
   const [type,    setType]    = useState("");
   const [style,   setStyle]   = useState("");
   const [colors,  setColors]  = useState<string[]>([]);
+  const [customColor, setCustomColor] = useState("#000000");
+  const [showPicker,  setShowPicker]  = useState(false);
+  const colorInputRef = useRef<HTMLInputElement>(null);
   const [name,    setName]    = useState("");
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
@@ -61,6 +64,12 @@ export default function UploadPage() {
 
   function toggleColor(c: string) {
     setColors((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]);
+  }
+
+  function addCustomColor() {
+    const label = customColor.toLowerCase();
+    if (!colors.includes(label)) setColors((prev) => [...prev, label]);
+    setShowPicker(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -204,10 +213,10 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {/* Colors — actual color swatches */}
+          {/* Colors — actual color swatches + custom picker */}
           <div className="space-y-2">
             <p className="text-sm font-semibold text-neutral-700">Colors</p>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2.5 items-center">
               {COLORS.map((c) => (
                 <button
                   key={c.value}
@@ -224,9 +233,68 @@ export default function UploadPage() {
                   style={{ backgroundColor: c.hex }}
                 />
               ))}
+
+              {/* Custom color swatches added by user */}
+              {colors
+                .filter((c) => c.startsWith("#"))
+                .map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => toggleColor(c)}
+                    title={c}
+                    className="w-8 h-8 rounded-full ring-2 ring-offset-2 ring-primary-400 scale-110 transition-all border border-white shadow"
+                    style={{ backgroundColor: c }}
+                  />
+                ))
+              }
+
+              {/* + Custom color button */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setShowPicker((v) => !v); setTimeout(() => colorInputRef.current?.click(), 50); }}
+                  className="w-8 h-8 rounded-full border-2 border-dashed border-neutral-300 flex items-center justify-center hover:border-primary-400 transition-colors bg-white"
+                  title="Pick custom color"
+                >
+                  <span className="text-neutral-400 text-lg leading-none">+</span>
+                </button>
+
+                {/* Hidden native color input */}
+                <input
+                  ref={colorInputRef}
+                  type="color"
+                  value={customColor}
+                  onChange={(e) => setCustomColor(e.target.value)}
+                  onBlur={addCustomColor}
+                  className="absolute opacity-0 w-0 h-0 pointer-events-none"
+                />
+              </div>
             </div>
+
+            {/* Selected colors summary */}
             {colors.length > 0 && (
-              <p className="text-xs text-neutral-400 capitalize">{colors.join(", ")}</p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {colors.map((c) => (
+                  <span
+                    key={c}
+                    className="flex items-center gap-1.5 bg-white border border-neutral-200 rounded-full px-2.5 py-1 text-xs font-medium text-neutral-700"
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full border border-neutral-200 flex-shrink-0"
+                      style={{ backgroundColor: c.startsWith("#") ? c : COLORS.find((x) => x.value === c)?.hex }}
+                    />
+                    {c.startsWith("#") ? c.toUpperCase() : c}
+                    <button
+                      type="button"
+                      onClick={() => setColors((prev) => prev.filter((x) => x !== c))}
+                      className="text-neutral-400 hover:text-red-500 transition-colors leading-none"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
             )}
           </div>
 
