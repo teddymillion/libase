@@ -3,6 +3,7 @@ import multer from "multer";
 import sharp from "sharp";
 import path from "path";
 import fs from "fs";
+import { extractClothing } from "./clothingExtractor";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -44,7 +45,11 @@ export async function uploadToCloudinary(
   buffer: Buffer,
   folder = "libase/clothing"
 ): Promise<UploadResult> {
-  const compressed = await compressImage(buffer);
+  // Step 1 — Extract clothing (remove person + background)
+  const extracted = await extractClothing(buffer);
+
+  // Step 2 — Compress to WebP
+  const compressed = await compressImage(extracted);
 
   // Upload as base64 stream
   const b64 = `data:image/webp;base64,${compressed.toString("base64")}`;
@@ -52,18 +57,13 @@ export async function uploadToCloudinary(
   const result = await cloudinary.uploader.upload(b64, {
     folder,
     resource_type: "image",
-    // ── Image enhancement ──────────────────────────────────────────────────
     transformation: [
       { quality: "auto:best" },
       { fetch_format: "auto" },
-      // Auto improve: contrast + vibrance + sharpen
       { effect: "improve:outdoor:50" },
       { effect: "sharpen:60" },
     ],
-    // ── Background removal (Cloudinary AI) ────────────────────────────────
-    // Uses Cloudinary's free background removal add-on
-    // Falls back gracefully if add-on not enabled
-    background_removal: "cloudinary_ai",
+    // background_removal handled by Remove.bg before this step
   });
 
   const base = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`;

@@ -56,6 +56,7 @@ app.get("/health", (_, res) => res.json({
   status:  "ok",
   service: "libase-api",
   env:     process.env.NODE_ENV,
+  removebg: !!process.env.REMOVEBG_API_KEY ? "configured" : "not set",
 }));
 
 // Global error handler
