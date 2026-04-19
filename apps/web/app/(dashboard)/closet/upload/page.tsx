@@ -95,7 +95,7 @@ export default function UploadPage() {
   const step = !file ? 0 : !type ? 1 : !style ? 2 : colors.length === 0 ? 3 : 4;
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-12">
+    <main className="min-h-screen bg-neutral-50 pb-32">
       <div className="max-w-lg mx-auto px-4 pt-8">
 
         {/* Header */}
@@ -234,8 +234,8 @@ export default function UploadPage() {
             <p className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl">{error}</p>
           )}
 
-          <Button type="submit" loading={loading} disabled={step < 4}>
-            Add to my closet ✨
+          <Button type="submit" loading={loading}>
+            {step < 4 ? `Complete ${["photo","type","style","color"][step]} to continue` : "Add to my closet ✨"}
           </Button>
 
         </form>
