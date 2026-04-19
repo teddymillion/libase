@@ -24,13 +24,17 @@ const PORT = process.env.PORT || 4000;
 
 // CORS — allow multiple origins
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:3000",
+  process.env.CLIENT_URL,
   "http://localhost:3000",
-];
+  "http://localhost:3001",
+].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.some((o) => origin.startsWith(o))) return cb(null, true);
+    console.error("CORS blocked:", origin, "allowed:", allowedOrigins);
     cb(new Error("Not allowed by CORS"));
   },
   credentials: true,

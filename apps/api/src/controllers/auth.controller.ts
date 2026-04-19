@@ -21,10 +21,11 @@ function generateTokens(userId: string) {
 }
 
 function setRefreshCookie(res: Response, token: string) {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure:   process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure:   isProd,
+    sameSite: isProd ? "none" : "strict", // "none" required for cross-origin in production
     maxAge:   7 * 24 * 60 * 60 * 1000,
   });
 }
@@ -42,7 +43,8 @@ export async function signup(req: Request, res: Response) {
   const { access, refresh } = generateTokens(String(user._id));
 
   setRefreshCookie(res, refresh);
-  res.status(201).json({ user, accessToken: access });
+  // Also return refresh token in body for cross-origin fallback
+  res.status(201).json({ user, accessToken: access, refreshToken: refresh });
 }
 
 export async function login(req: Request, res: Response) {
@@ -57,18 +59,19 @@ export async function login(req: Request, res: Response) {
 
   const { access, refresh } = generateTokens(String(user._id));
   setRefreshCookie(res, refresh);
-  res.json({ user, accessToken: access });
+  res.json({ user, accessToken: access, refreshToken: refresh });
 }
 
 export async function refresh(req: Request, res: Response) {
-  const token = req.cookies?.refreshToken;
+  // Try cookie first, then body (cross-origin fallback)
+  const token = req.cookies?.refreshToken || req.body?.refreshToken;
   if (!token) return res.status(401).json({ message: "No refresh token" });
 
   try {
-    const payload     = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { userId: string };
+    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { userId: string };
     const { access, refresh: newRefresh } = generateTokens(payload.userId);
     setRefreshCookie(res, newRefresh);
-    res.json({ accessToken: access });
+    res.json({ accessToken: access, refreshToken: newRefresh });
   } catch {
     res.status(401).json({ message: "Session expired, please log in again" });
   }
