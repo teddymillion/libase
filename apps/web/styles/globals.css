@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-900 antialiased;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    overflow-y: scroll;
+    /* Safe area for notched phones */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent text size adjustment on orientation change */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-card border border-neutral-100;
+  }
+
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Hide scrollbar but keep scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Staggered grid animation */
+  .grid-item {
+    animation: scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .grid-item:nth-child(1)   { animation-delay: 0ms;   }
+  .grid-item:nth-child(2)   { animation-delay: 40ms;  }
+  .grid-item:nth-child(3)   { animation-delay: 80ms;  }
+  .grid-item:nth-child(4)   { animation-delay: 120ms; }
+  .grid-item:nth-child(5)   { animation-delay: 160ms; }
+  .grid-item:nth-child(6)   { animation-delay: 200ms; }
+  .grid-item:nth-child(n+7) { animation-delay: 240ms; }
+
+  /* Page transition */
+  .page-enter {
+    animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply bg-neutral-200 rounded-xl;
+    background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* Safe area bottom padding for fixed nav */
+  .pb-safe {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
