@@ -44,9 +44,26 @@ export default function OutfitsPage() {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    api.get("/outfits/saved")
-      .then(({ data }) => setSaved(data.outfits))
-      .finally(() => setFetching(false));
+    async function load() {
+      try {
+        const { data } = await api.get("/outfits/saved");
+        setSaved(data.outfits);
+        // Auto-generate on first visit if no saved outfits
+        if (data.outfits.length === 0) {
+          setLoading(true);
+          try {
+            const gen = await api.post("/outfits/generate");
+            setOutfits(gen.data.outfits);
+            setPrefs(gen.data.preferences);
+            setGridKey((k) => k + 1);
+          } catch { /* not enough items yet — silent fail */ }
+          finally { setLoading(false); }
+        }
+      } finally {
+        setFetching(false);
+      }
+    }
+    load();
   }, []);
 
   async function handleGenerate() {

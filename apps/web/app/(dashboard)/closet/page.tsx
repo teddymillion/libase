@@ -86,11 +86,18 @@ export default function ClosetPage() {
 
         {/* Header */}
         <div className="pt-10 pb-4 flex items-center justify-between animate-slide-down">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-neutral-900">My Closet</h1>
-            <p className="text-neutral-500 text-sm mt-0.5">
-              {loading ? "Loading..." : `${items.length} item${items.length !== 1 ? "s" : ""}`}
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-primary-400 rounded-lg flex items-center justify-center">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-display text-xl font-bold text-neutral-900">My Closet</h1>
+              <p className="text-neutral-500 text-xs mt-0.5">
+                {loading ? "Loading..." : `${items.length} item${items.length !== 1 ? "s" : ""}`}
+              </p>
+            </div>
           </div>
           <Link href="/closet/upload"
             className="flex items-center gap-1.5 bg-primary-400 text-white font-semibold text-sm px-4 py-2.5 rounded-xl hover:bg-primary-500 active:scale-95 transition-all duration-150"

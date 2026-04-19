@@ -21,7 +21,7 @@ interface Outfit {
 }
 
 interface OutfitCardProps {
-  outfit: Outfit;
+  outfit:    Outfit;
   onSave:    (id: string) => void;
   onDelete:  (id: string) => void;
   onPreview: (id: string) => void;
@@ -49,6 +49,10 @@ export function OutfitCard({ outfit, onSave, onDelete, onPreview }: OutfitCardPr
     } finally { setDeleting(false); }
   }
 
+  const Spinner = () => (
+    <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+  );
+
   return (
     <div className="grid-item card p-4 space-y-3">
 
@@ -62,17 +66,11 @@ export function OutfitCard({ outfit, onSave, onDelete, onPreview }: OutfitCardPr
         )}
       </div>
 
-      {/* Items — horizontal scroll strip */}
+      {/* Items strip */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
         {outfit.items.map((item) => (
           <div key={item._id} className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-100">
-            <Image
-              src={item.imageUrl}
-              alt={item.name || item.type}
-              fill
-              className="object-cover"
-              sizes="80px"
-            />
+            <Image src={item.imageUrl} alt={item.name || item.type} fill className="object-cover" sizes="80px" />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1">
               <p className="text-white text-[10px] font-medium capitalize truncate">{item.name || item.type}</p>
             </div>
@@ -80,9 +78,8 @@ export function OutfitCard({ outfit, onSave, onDelete, onPreview }: OutfitCardPr
         ))}
       </div>
 
-      {/* Actions */}
+      {/* Actions — Preview + Save/Delete */}
       <div className="flex gap-2">
-        {/* Preview — opens full screen */}
         <button
           onClick={() => onPreview(outfit._id)}
           className="flex-1 flex items-center justify-center gap-1.5 bg-neutral-900 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-neutral-800 active:scale-95 transition-all"
@@ -91,41 +88,29 @@ export function OutfitCard({ outfit, onSave, onDelete, onPreview }: OutfitCardPr
         </button>
 
         {!saved ? (
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-primary-400 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-primary-500 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {saving
-              ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : "🔖 Save"
-            }
-          </button>
+          <>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-primary-400 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-primary-500 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {saving ? <Spinner /> : "🔖 Save"}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-3 flex items-center justify-center text-sm font-medium py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-red-500 hover:border-red-200 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {deleting ? <Spinner /> : "✕"}
+            </button>
+          </>
         ) : (
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className={cn(
-              "flex items-center justify-center px-4 text-sm font-medium py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-red-500 hover:border-red-200 active:scale-95 transition-all disabled:opacity-50"
-            )}
+            className="flex-1 flex items-center justify-center text-sm font-medium py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-red-500 hover:border-red-200 active:scale-95 transition-all disabled:opacity-50"
           >
-            {deleting
-              ? <span className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
-              : "✕"
-            }
-          </button>
-        )}
-
-        {!saved && (
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="flex items-center justify-center px-3 text-sm font-medium py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-red-500 hover:border-red-200 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {deleting
-              ? <span className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
-              : "✕"
-            }
+            {deleting ? <Spinner /> : "Remove"}
           </button>
         )}
       </div>
