@@ -6,14 +6,11 @@ const nextConfig = {
       { protocol: "http",  hostname: "localhost" },
     ],
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [360, 480, 640, 750, 828, 1080],
   },
-  compress: true,
+  compress:        true,
   poweredByHeader: false,
-  experimental: {
-    optimizeCss: true,
-  },
 };
 
 module.exports = nextConfig;
