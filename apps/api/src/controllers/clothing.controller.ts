@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import ClothingItem from "../models/ClothingItem";
-import { cloudinary } from "../services/cloudinary";
+import { cloudinary, uploadToCloudinary, uploadLocal } from "../services/cloudinary";
 import { z } from "zod";
 
 const itemSchema = z.object({
@@ -12,38 +12,45 @@ const itemSchema = z.object({
   name:   z.string().optional(),
 });
 
+const useCloudinary = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
+
 export async function uploadItem(req: AuthRequest, res: Response) {
-  console.log("UPLOAD HIT — file:", req.file, "body:", req.body);
   if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
   const result = itemSchema.safeParse(req.body);
-  if (!result.success) {
-    console.log("VALIDATION FAIL:", result.error.errors);
+  if (!result.success)
     return res.status(400).json({ message: result.error.errors[0].message });
-  }
 
   const { type, color, style, season, name } = result.data;
-  const file = req.file as any;
 
-  // Works for both Cloudinary (file.path + file.filename) and local (file.path + file.filename)
-  const imageUrl = file.path?.startsWith("http")
-    ? file.path
-    : `${process.env.CLIENT_URL?.replace("3000", "4000") || "http://localhost:4000"}/uploads/${file.filename}`;
+  try {
+    // ── Process & upload image ─────────────────────────────────────────────
+    const uploaded = useCloudinary
+      ? await uploadToCloudinary(req.file.buffer, "libase/clothing")
+      : await uploadLocal(req.file.buffer, req.file.originalname);
 
-  const publicId = file.filename || file.public_id || file.path;
+    const item = await ClothingItem.create({
+      userId:   req.userId,
+      imageUrl: uploaded.imageUrl,
+      thumbUrl: uploaded.thumbUrl,
+      cardUrl:  uploaded.cardUrl,
+      publicId: uploaded.publicId,
+      type,
+      color:  color.split(",").map((c: string) => c.trim()),
+      style,
+      season: season || "all",
+      name,
+    });
 
-  const item = await ClothingItem.create({
-    userId: req.userId,
-    imageUrl,
-    publicId,
-    type,
-    color:  color.split(",").map((c: string) => c.trim()),
-    style,
-    season: season || "all",
-    name,
-  });
-
-  res.status(201).json({ item });
+    res.status(201).json({ item });
+  } catch (err: any) {
+    console.error("Upload error:", err.message);
+    res.status(500).json({ message: "Image processing failed: " + err.message });
+  }
 }
 
 export async function getItems(req: AuthRequest, res: Response) {
@@ -60,7 +67,6 @@ export async function deleteItem(req: AuthRequest, res: Response) {
   const item = await ClothingItem.findOne({ _id: req.params.id, userId: req.userId });
   if (!item) return res.status(404).json({ message: "Item not found" });
 
-  // Only destroy from Cloudinary if it's a Cloudinary URL
   if (item.imageUrl.includes("cloudinary.com")) {
     await cloudinary.uploader.destroy(item.publicId);
   }

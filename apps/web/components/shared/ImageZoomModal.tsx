@@ -6,6 +6,8 @@ import { useEffect } from "react";
 interface Item {
   _id: string;
   imageUrl: string;
+  thumbUrl?: string;
+  cardUrl?:  string;
   type: string;
   name?: string;
   color: string[];

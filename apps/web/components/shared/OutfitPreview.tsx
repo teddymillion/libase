@@ -8,6 +8,8 @@ import { ImageZoomModal } from "./ImageZoomModal";
 interface Item {
   _id: string;
   imageUrl: string;
+  thumbUrl?: string;
+  cardUrl?:  string;
   type: string;
   name?: string;
   color: string[];
@@ -104,7 +106,7 @@ export function OutfitPreview({ outfits, currentIndex, onNext, onPrev, onSave, o
                   )}
                 >
                   <Image
-                    src={item.imageUrl}
+                    src={item.cardUrl || item.thumbUrl || item.imageUrl}
                     alt={item.name || item.type}
                     fill
                     className="object-cover"

@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 interface ClothingItem {
   _id: string;
   imageUrl: string;
+  thumbUrl?: string;
+  cardUrl?:  string;
   type: string;
   name?: string;
   color: string[];
@@ -70,7 +72,7 @@ export function OutfitCard({ outfit, onSave, onDelete, onPreview }: OutfitCardPr
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
         {outfit.items.map((item) => (
           <div key={item._id} className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-100">
-            <Image src={item.imageUrl} alt={item.name || item.type} fill className="object-cover" sizes="80px" />
+            <Image src={item.cardUrl || item.thumbUrl || item.imageUrl} alt={item.name || item.type} fill className="object-cover" sizes="80px" />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1">
               <p className="text-white text-[10px] font-medium capitalize truncate">{item.name || item.type}</p>
             </div>

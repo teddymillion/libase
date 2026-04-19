@@ -7,7 +7,6 @@ const router = Router();
 
 router.use(requireAuth);
 
-// Wrap multer errors so they reach the global error handler
 router.post("/", (req: Request, res: Response, next: NextFunction) => {
   upload.single("image")(req, res, (err) => {
     if (err) {

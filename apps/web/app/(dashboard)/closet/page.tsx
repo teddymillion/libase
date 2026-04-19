@@ -14,6 +14,8 @@ const FILTERS = ["all", "top", "bottom", "shoes", "outerwear", "accessory", "dre
 interface ClothingItem {
   _id: string;
   imageUrl: string;
+  thumbUrl: string;
+  cardUrl:  string;
   type: string;
   style: string;
   color: string[];
@@ -133,7 +135,7 @@ export default function ClosetPage() {
               <div key={item._id} className="grid-item group relative aspect-square rounded-xl overflow-hidden bg-white shadow-card">
 
                 <Image
-                  src={item.imageUrl}
+                  src={item.thumbUrl || item.imageUrl}
                   alt={item.name || item.type}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer"
